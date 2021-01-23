@@ -1,0 +1,44 @@
+version: "3"
+services:
+  app:
+    # docker-compose up実行時に開始する関連サービス（上から順に実行）
+    depends_on:
+      - postgres
+    # コンテナを実行するときの元となるimage
+    image: hoge/node
+    # マウントするパス（ホストの相対パス：DockerfileのWORKDIRからの絶対パス）
+    volumes:
+      - ./app:/usr/src/app
+    container_name: "hoge_express-pg"
+    # ホストマシンにつなげるポート（ホスト：コンテナ）
+    ports:
+      - 5000:9000
+    # 環境変数
+    env_file: .env
+    # コンテナの永続化
+    tty: true
+
+  postgres:
+    image: postgres:13-alpine
+    container_name: hoge_postgres
+    ports:
+      - 5432:5432
+    volumes:
+      - ./postgres/init:/docker-entrypoint-initdb.d
+    env_file: .env
+    hostname: postgres
+    # restart: always
+    user: root
+
+  pgadmin4:
+    image: dpage/pgadmin4:4.20
+    container_name: hoge_pgadmin4
+    depends_on:
+      - postgres
+    ports:
+      - 80:80
+    volumes:
+      - ./pgadmin:/var/lib/pgadmin/storage
+    env_file: .env
+    hostname: pgadmin4
+    # restart: always
